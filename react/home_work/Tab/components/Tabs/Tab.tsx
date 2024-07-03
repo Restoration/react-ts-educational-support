@@ -1,3 +1,4 @@
+import React from "react";
 interface TabProps {
   index: number;
   label: string;

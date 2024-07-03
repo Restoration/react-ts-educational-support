@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TabData } from "../App";
+import { TabData } from "./data";
 import { Tab } from "./Tab";
 import { TabContent } from "./TabContent";
 
