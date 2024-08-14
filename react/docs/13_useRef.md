@@ -1,5 +1,7 @@
 ## useRef
 
+[https://ja.react.dev/reference/react/useRef](https://ja.react.dev/reference/react/useRef)
+
 useRefはReactのフックの一つで、関数コンポーネント内でDOM要素や変数の参照を保持するために使用されます。
 useRefは、状態や再レンダリングに依存しない値を保持したい場合に便利です。
 また直接DOMに対して操作を行いたい場合などで有用です。
@@ -45,7 +47,8 @@ const Timer: React.FC = () => {
 
   const increment = () => {
     countRef.current++;
-    setCount(countRef.current);
+    // setCount(countRef.current);
+    console.log(countRef.current);
   };
 
   return (
@@ -202,9 +205,83 @@ const DynamicMultipleRefs: React.FC = () => {
 export default DynamicMultipleRefs;
 ```
 
-### 3. useImperativeHandleを使用する場合
+
+### 3. useEffectを利用してイベントハンドラーを付与する方法
+
+```tsx
+import { useEffect, useRef } from 'react';
+import MyInput from './MyInput';
+
+export default function Form() {
+  const ref = useRef<null | HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleAlert = () => {
+      alert("alert");
+    }
+    if(ref && ref.current) {
+      ref.current.addEventListener("click", handleAlert);
+    }
+    return () => {
+      ref.current?.removeEventListener("click", handleAlert)
+    }
+  }, [ref, ref.current]);
+
+  return (
+    <form>
+      <MyInput label="Enter your name:" ref={ref} />
+      <button type="button">
+        Edit
+      </button>
+    </form>
+  );
+}
+```
+
+```tsx
+import { forwardRef } from 'react';
+
+const MyInput = (props: { label: string }, ref: React.ForwardedRef<HTMLInputElement>) => {
+    const { label,  ...otherProps  } = props;
+    return (
+      <label>
+        {label}
+        <input {...otherProps} ref={ref} />
+      </label>
+    )
+}
+export default forwardRef(MyInput);
+```
+
+
+## forwardRef
+
+[https://ja.react.dev/reference/react/forwardRef](https://ja.react.dev/reference/react/forwardRef)
+
+refはpropsに含めることができない。そのため自作したコンポーネントに対してrefを渡したい場合はforwardRefを利用する必要がある。
+
+
+```jsx
+import { forwardRef } from 'react';
+
+const MyInput = forwardRef(function MyInput(props, ref) {
+  const { label, ...otherProps } = props;
+  return (
+    <label>
+      {label}
+      <input {...otherProps} />
+    </label>
+  );
+});
+```
+
+
+### おまけ： useImperativeHandleを使用する場合
 
 useImperativeHandleを使ってカスタムの参照を作成し、コンポーネント外部から内部の要素にアクセスできるようにすることもできます。
+
+できればこちらのHooksを利用しないように設計したい。
+
 
 ```tsx
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
