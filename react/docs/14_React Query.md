@@ -207,3 +207,10 @@ function App() {
 export default App;
 ```
 
+### その他有用なHooks
+
+[useQueries](https://tanstack.com/query/latest/docs/framework/react/reference/useQueries)  
+複数のクエリを送るためのHooks
+
+[useInfiniteQuery](https://tanstack.com/query/latest/docs/framework/react/reference/useInfiniteQuery)  
+スクロールするごとにページングするためのHooks
