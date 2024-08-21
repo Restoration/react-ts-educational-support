@@ -49,16 +49,13 @@ export default App;
 ### Query
 ```tsx
 import React from 'react';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 // ユーザーの型定義
 interface User {
   id: number;
   name: string;
 }
-
-// QueryClientのインスタンスを作成
-const queryClient = new QueryClient();
 
 // ユーザーデータを取得する関数
 async function fetchUsers(): Promise<User[]> {
@@ -69,8 +66,8 @@ async function fetchUsers(): Promise<User[]> {
   return response.json();
 }
 
-function Users() {
-  const { data, error, isLoading } = useQuery<User[], Error>(['users'], fetchUsers);
+function App() {
+  const { data, error, isLoading } = useQuery({ queryKey: ['users'], queryFn: fetchUsers });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>An error occurred: {error.message}</div>;
@@ -87,14 +84,6 @@ function Users() {
   );
 }
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Users />
-    </QueryClientProvider>
-  );
-}
-
 export default App;
 ```
 
@@ -104,7 +93,7 @@ export default App;
 
 ```tsx
 import React, { useState } from 'react';
-import { QueryClient, QueryClientProvider, useQuery, useMutation } from '@tanstack/react-query';
+import { QueryClient, useQuery, useMutation } from '@tanstack/react-query';
 
 // ユーザーの型定義
 interface User {
@@ -145,15 +134,16 @@ async function createUser(newUser: NewUser): Promise<User> {
   return response.json();
 }
 
-function Users() {
+function App() {
   const [name, setName] = useState<string>('');
-  const { data, error, isLoading } = useQuery<User[], Error>(['users'], fetchUsers);
+  const { data, error, isLoading } = useQuery<User[], Error>({ queryKey: ['users'], queryFn: fetchUsers });
 
   // useMutationフックを使用して、新しいユーザーを作成
-  const mutation = useMutation<User, Error, NewUser>(createUser, {
+  const mutation = useMutation<User, Error, NewUser>({
+    mutationFn: createUser,
     onSuccess: () => {
       // ユーザーが正常に作成された後にキャッシュを無効化して再フェッチ
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
@@ -184,7 +174,7 @@ function Users() {
         />
         <button onClick={handleCreateUser}>Create User</button>
       </div>
-      {mutation.isLoading ? (
+      {mutation.isPending ? (
         <p>Creating user...</p>
       ) : (
         mutation.isError ? (
@@ -196,15 +186,6 @@ function Users() {
     </div>
   );
 }
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Users />
-    </QueryClientProvider>
-  );
-}
-
 export default App;
 ```
 
